@@ -5,6 +5,7 @@ type User = {
   id: number;
   name: string;
   email: string;
+  user_type: string
 }
 
 type Credentials = {
@@ -15,13 +16,12 @@ type Credentials = {
 type RegistrationInfo = {
   name: string;
   email: string;
-  password: string;
-  password_confirmation: string;
+  password: string
 }
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<User | null>(null)
-  const isLoggedIn = computed(() => !!user.value)
+  const isLoggedIn = computed(() => user.value)
 
   async function logout() {
     await useApiFetch("/logout", {method: "POST"});
