@@ -7,6 +7,10 @@
 //     "./plugins/**/*.{js,ts}",
 //     "./app.vue",
 //     "./error.vue",
+//     "./node_modules/flowbite/**/*.{js,ts}"
+//   ],
+//   plugins: [
+//     require('flowbite/plugin')
 //   ],
 //   css: ['~/assets/css/main.css'], 
 //   darkMode: 'class',
@@ -52,7 +56,6 @@
 //     'Noto Color Emoji'
 //   ]
 //     }
-//   },
-//   plugins: [],
+//   }
 // }
 
