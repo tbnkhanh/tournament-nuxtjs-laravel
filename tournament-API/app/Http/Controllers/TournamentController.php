@@ -18,6 +18,12 @@ class TournamentController extends Controller
         return response()->json($tournaments);
     }
 
+    public function findById($id)
+    {
+        $tournament = Tournament::find($id);
+        return response()->json($tournament);
+    }
+
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [

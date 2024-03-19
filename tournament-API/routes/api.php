@@ -19,8 +19,9 @@ Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
 });
 
 Route::prefix("tournament")->group(function () {
-    Route::get('/getAll', [TournamentController::class, 'index'])->name('tournament.index');
-    Route::post('/create', [TournamentController::class, 'store'])->name('tournament.store');
-    Route::post('/update', [TournamentController::class, 'update'])->name('tournament.update');
-    Route::delete('/delete/{id}', [TournamentController::class, 'destroy'])->name('tournament.destroy');
+    Route::get('/getAll', [TournamentController::class, 'index']);
+    Route::get('/findById/{id}', [TournamentController::class, 'findById']);
+    Route::post('/create', [TournamentController::class, 'store']);
+    Route::post('/update', [TournamentController::class, 'update']);
+    Route::delete('/delete/{id}', [TournamentController::class, 'destroy']);
 });

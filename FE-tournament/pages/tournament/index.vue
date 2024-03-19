@@ -1,4 +1,7 @@
 <script setup>
+import { useAuthStore } from "~/stores/useAuthStore";
+
+const auth = useAuthStore();
 const { data } = await useApiFetch("/api/tournament/getAll");
 
 const modalCreate = ref(false);
@@ -64,7 +67,7 @@ const handleEdit = (tournament) => {
     <div class="bg-gray-100 py-2">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div style="text-align: center;" class="mt-3">
-                <button @click="openModalCreate"
+                <button @click="openModalCreate" v-if="auth.user?.user_type === 'admin'"
                     class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
                     Create New Tournament
                 </button>
@@ -82,13 +85,15 @@ const handleEdit = (tournament) => {
                         <p class="font-normal text-gray-700 dark:text-gray-400">Tournament Time:
                             {{ tournament.start_date }} - {{ tournament.end_date }}</p>
 
-                        <button type="button"
+                        <NuxtLink :to="`/tournament/detail/${tournament.id}`">
+                            <button type="button" 
                             class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mt-3 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Detail</button>
-
-                        <button type="button" @click="handleEdit(tournament)"
+                        </NuxtLink>
+                       
+                        <button type="button" @click="handleEdit(tournament)" v-if="auth.user?.user_type === 'admin'"
                             class="focus:outline-none text-white bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-yellow-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mt-3 dark:focus:ring-yellow-900">Edit</button>
 
-                        <button type="button" @click="handleDelete(tournament.id, tournament.tournament_name)"
+                        <button type="button" @click="handleDelete(tournament.id, tournament.tournament_name)" v-if="auth.user?.user_type === 'admin'"
                             class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mt-3 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900">Delete</button>
                     </div>
                 </div>
