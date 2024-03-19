@@ -12,9 +12,8 @@
                         </svg>
                     </button>
                 </div>
-                <h2 class="text-2xl font-bold mb-4" style="text-align: center;">Create New Tournament</h2>
+                <h2 class="text-2xl font-bold mb-4" style="text-align: center;">Edit Tournament</h2>
                 <!-- Your contact form content here -->
-                <!-- <form action="/tournament/create" method="post"> -->
                 <div class="mb-4">
                     <label for="name" class="block text-gray-700 text-sm font-bold mb-2">Tournament Name</label>
                     <input type="text" id="name" name="name" v-model="form.tournamentName"
@@ -67,8 +66,8 @@
                 </div>
 
                 <div style="text-align: center;">
-                    <button @click="handleCreateTournament(close)" type="submit"
-                        class="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-700">Create
+                    <button @click="handleSave(close)"
+                        class="focus:outline-none text-white bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-yellow-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:focus:ring-yellow-900">Save
                         Tournament</button>
                 </div>
 
@@ -78,16 +77,21 @@
 </template>
 
 <script setup>
-const initData = {
-    tournamentName: "",
-    tournamentDescription: "",
-    selectedGame: "",
-    selectedTeamSize: "",
-    startDate: "",
-    endDate: "",
-};
 
-const form = ref(initData);
+const props = defineProps({
+    open: Boolean,
+    tournament: Object
+});
+const tournament = props.tournament
+const form = ref({
+    id: tournament?.id ?? '',
+    tournamentName: tournament?.tournament_name ?? '',
+    tournamentDescription: tournament?.tournament_description ?? '',
+    selectedGame: tournament?.game_played ?? '',
+    selectedTeamSize: tournament?.team_size ?? '',
+    startDate: tournament?.start_date ?? '',
+    endDate: tournament?.end_date ?? '',
+});
 
 const notify = (message) => {
     useNuxtApp().$toast.info(message, {
@@ -96,47 +100,31 @@ const notify = (message) => {
     });
 };
 
-async function handleCreateTournament(close) {
-    let validate = true;
-    for (const value of Object.values(form.value)) {
-        if (!value) {
-            validate = false
+async function handleSave(close) {
+    try {
+        await useApiFetch("/sanctum/csrf-cookie");
+        const { data, error, status } = await useApiFetch("/api/tournament/update", {
+            method: "POST",
+            body: form.value,
+        });
+
+        if (status.value === 'success') {
+            notify(data.value.message)
+            await useApiFetch("/api/tournament/getAll");
+            close();
+        } else {
+            notify(error.value.data.message)
         }
+    } catch (error) {
+        console.log(error);
     }
-
-    if (!validate) {
-        notify("Please fill in all field")
-    } else {
-        try {
-            await useApiFetch("/sanctum/csrf-cookie");
-            const { data, error, status } = await useApiFetch("/api/tournament/create", {
-                method: "POST",
-                body: form.value,
-            });
-            // console.log(error.value.statusCode);
-
-            if (status.value === 'success') {
-                notify(data.value.message)
-                await useApiFetch("/api/tournament/getAll");
-                close();
-                form.value = ({})
-            } else {
-                notify(error.value.data.message)
-            }
-        } catch (error) {
-            console.log(error);
-        }
-
-    }
-
 };
 </script>
 
+
 <script>
 export default {
-    props: {
-        open: Boolean
-    },
+
     methods: {
         close() {
             this.$emit('close');
