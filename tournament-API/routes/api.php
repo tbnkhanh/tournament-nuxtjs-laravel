@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\TeamController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TournamentController;
@@ -24,4 +25,10 @@ Route::prefix("tournament")->group(function () {
     Route::post('/create', [TournamentController::class, 'store']);
     Route::post('/update', [TournamentController::class, 'update']);
     Route::delete('/delete/{id}', [TournamentController::class, 'destroy']);
+});
+
+Route::prefix("team")->group(function () {
+    Route::get('/getTeamsWithPlayers/{tournamentId}', [TeamController::class, 'getTeamsWithPlayers']);
+    Route::post('/create', [TeamController::class, 'store']);
+    Route::delete('/delete/{id}', [TeamController::class, 'destroy']);
 });

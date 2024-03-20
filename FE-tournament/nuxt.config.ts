@@ -10,5 +10,8 @@ export default defineNuxtConfig({
       autoprefixer: {},
     },
   },
-  devtools: { enabled: true }
+  devtools: { enabled: true },
+  // imports: {
+  //   dirs: ['types/*.ts', 'store/*.ts', 'types/**/*.ts'],
+  // },
 })
