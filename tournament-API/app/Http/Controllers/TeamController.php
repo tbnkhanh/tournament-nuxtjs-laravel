@@ -72,6 +72,86 @@ class TeamController extends Controller
         return response()->json(['message' => "Add New Team Success"]);
     }
 
+    public function update(Request $request)
+    {   
+        $teamId = $request->input('team_id');
+
+        //update team name, team seed
+        $team = Team::find($teamId);
+        $team->team_name = $request->input('team_name');;
+        $team->seed = $request->input('seed');;
+        $team->save();
+
+        $players = $request->input('players');
+        $emailsRequest = [];
+        $in_game = [];  
+
+        foreach ($players as $key => $player) {
+            array_push($emailsRequest, $player['email']);
+            array_push($in_game, $player['in_game_name']);
+        }
+
+        $checkedEmails = [];
+        $emailsNeedUpdate = [];
+        $emailsNeedDelete = [];
+        
+        $emailsCurrent = Team::with('players.user')
+            ->where('id', $teamId)
+            ->get()
+            ->pluck('players.*.user.email')
+            ->flatten()
+            ->toArray();
+        
+        foreach ($emailsRequest as $index => $email) {
+            if ($email !== $emailsCurrent[$index]) {
+                array_push($emailsNeedDelete, $emailsCurrent[$index]);
+                unset($emailsCurrent[$index]);
+                array_push($emailsNeedUpdate, $email);
+            }
+        }
+
+        $usersRemain = User::where('user_type', 'player')
+            ->whereDoesntHave('player')
+            ->pluck('email')
+            ->toArray();
+
+        if (count($emailsCurrent) > 0) {
+            foreach ($emailsCurrent as $email) {
+                $players = Player::whereHas('user', function ($query) use ($email) {
+                    $query->where('email', $email);
+                })->get()->first();
+                $index = array_search($email, $emailsRequest);
+                $players->in_game_name = $in_game[$index];
+                $players->save();
+            }
+        }
+        if (count($emailsNeedUpdate) > 0) {
+            foreach ($emailsNeedUpdate as $index => $email) {
+                $indexDelete = $index;
+                if (in_array($email, $checkedEmails)) {
+                    return response()->json(['message' => "Email $email is duplicate"],409);
+                }
+                
+                $user = User::where('email', $email)->first();
+                if (is_null($user)) {
+                    return response()->json(['message' => "Player with email $email doesn't exist"],409);
+                }
+                if (!in_array($email, $usersRemain)) {
+                    return response()->json(['message' => "Player with email $email already in other team"],409);
+                }
+                else if ($user) {
+                    $index = array_search($email, $emailsRequest);
+                    Player::whereHas('user', function ($query) use ($emailsNeedDelete, $indexDelete) {
+                        $query->where('email', $emailsNeedDelete[$indexDelete]);
+                    })->delete();
+                    Player::insert(['user_id' => $user->id, "team_id" => $teamId, "in_game_name" => $in_game[$index]]);
+                }
+                array_push($checkedEmails, $email);
+            }
+        }
+        return response()->json(['message' => "Update Team Successfully"]);
+    }
+
     public function destroy($id)
     {
         $response = DB::table('teams')->where('id', $id )->delete();

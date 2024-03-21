@@ -1,22 +1,11 @@
-<script setup lang="ts">
+<script setup>
 import { useRoute } from "vue-router";
-import type { Tournament, Team } from "~/types/types";
 const route = useRoute();
 const tournamentId = route.params.id;
 
-let tournament: Tournament
-let teamsWithPlayers: Array<Team>
-
-try {
-  await useApiFetch("/sanctum/csrf-cookie");
-  const responseTournament = await useApiFetch(`/api/tournament/findById/${tournamentId}`);
-  tournament = responseTournament.data.value as Tournament
-  const responseTeams = await useApiFetch(`/api/team/getTeamsWithPlayers/${tournamentId}`);
-  teamsWithPlayers = responseTeams.data.value as Team[]
-
-} catch (error) {
-  console.log(error);
-}
+await useApiFetch("/sanctum/csrf-cookie");
+const { data: tournament } = await useApiFetch(`/api/tournament/findById/${tournamentId}`);
+const { data: teamsWithPlayers } = await useApiFetch(`/api/team/getTeamsWithPlayers/${tournamentId}`);
 
 const modalCreate = ref(false);
 const modalDelete = ref(false);
@@ -42,7 +31,7 @@ const closeModal = () => {
 
 let dataCreate = ref({});
 const createDispatch = ref(false);
-const handleCreateTeam = (tournamentId: number, teamSize: number) => {
+const handleCreateTeam = (tournamentId, teamSize) => {
   openModalCreate()
   createDispatch.value = true
   dataCreate.value = {
@@ -52,7 +41,7 @@ const handleCreateTeam = (tournamentId: number, teamSize: number) => {
 }
 
 const dataDelete = ref({})
-const handleDelete = (teamId: number, name: string, tournamentId: number) => {
+const handleDelete = (teamId, name, tournamentId) => {
   openModalDelete()
   dataDelete.value = {
     teamId,
@@ -62,15 +51,15 @@ const handleDelete = (teamId: number, name: string, tournamentId: number) => {
 }
 
 const closeModalEdit = () => {
-  modalEdit.value=false;
-  editDispatch.value=false;
+  modalEdit.value = false;
+  editDispatch.value = false;
 }
 
 let dataEdit = ref({});
 const editDispatch = ref(false);
 const handleEdit = (team) => {
   openModalEdit()
-  editDispatch.value=true
+  editDispatch.value = true
   dataEdit.value = team
 }
 </script>
@@ -78,29 +67,29 @@ const handleEdit = (team) => {
 <template>
   <TeamModalCreate v-if="createDispatch" :open="modalCreate" @close="closeModal" :dataCreate="dataCreate" />
   <TeamModalDelete :open="modalDelete" @close="closeModal" :dataDelete="dataDelete" />
-  <TeamModalEdit   v-if="editDispatch" :open="modalEdit"   @close="closeModalEdit" :dataEdit="dataEdit"  />
+  <TeamModalEdit v-if="editDispatch" :open="modalEdit" @close="closeModalEdit" :dataEdit="dataEdit" />
 
   <div style="text-align: center; margin-top: 30px; font-size: 25px">
     <b>
       Welcome to Tournament: {{ tournament.tournament_name }}
     </b>
-  </div>
-
-  <div class="py-2">
-    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8" style="max-width: 85rem">
-      <div style="text-align: center; font-size: 20px">
-        <div>Tournament Name: {{ tournament.tournament_name }}</div>
-        <div>Tournament Description: {{ tournament.tournament_description }}</div>
-        <div>Game Played: {{ tournament.game_played }}</div>
-        <div>Tournament Time: {{ tournament.start_date }} - {{ tournament.end_date }}</div>
+    <div class="py-2">
+      <div class="max-w-7xl mx-auto sm:px-6 lg:px-8" style="max-width: 85rem">
+        <div style="text-align: center; font-size: 20px">
+          <div>Tournament Name: {{ tournament.tournament_name }}</div>
+          <div>Tournament Description: {{ tournament.tournament_description }}</div>
+          <div>Game Played: {{ tournament.game_played }}</div>
+          <div>Tournament Time: {{ tournament.start_date }} - {{ tournament.end_date }}</div>
+        </div>
       </div>
     </div>
   </div>
 
-  <div class="bg-gray-100 py-5">
-  </div>
+  <TournamentBracket :tournament="tournament"/>
 
   <div class="py-2">
+    <div class="bg-gray-100 py-5">
+    </div>
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8" style="max-width: 85rem">
       <div style="text-align: center; font-size: 20px">
         <div>All Teams Participate</div>

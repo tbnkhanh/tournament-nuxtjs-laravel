@@ -84,13 +84,13 @@ const props = defineProps({
 });
 const tournament = props.tournament
 const form = ref({
-    id: tournament?.id ?? '',
-    tournamentName: tournament?.tournament_name ?? '',
-    tournamentDescription: tournament?.tournament_description ?? '',
-    selectedGame: tournament?.game_played ?? '',
-    selectedTeamSize: tournament?.team_size ?? '',
-    startDate: tournament?.start_date ?? '',
-    endDate: tournament?.end_date ?? '',
+    id: tournament?.id,
+    tournamentName: tournament?.tournament_name,
+    tournamentDescription: tournament?.tournament_description,
+    selectedGame: tournament?.game_played,
+    selectedTeamSize: tournament?.team_size,
+    startDate: tournament?.start_date,
+    endDate: tournament?.end_date,
 });
 
 const notify = (message) => {

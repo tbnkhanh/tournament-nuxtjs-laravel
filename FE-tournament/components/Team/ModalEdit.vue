@@ -31,7 +31,7 @@
                     <div class="mb-4">
                         <label for="name" class="block text-gray-700 text-sm font-bold mb-2">Player {{ key+1 }}
                             Email</label>
-                        <input type="text" id="name" name="player_email" v-model="player.user.email"
+                        <input type="text" id="name" name="player_email" v-model="player.email"
                             class="w-full p-2 border rounded-md focus:outline-none focus:border-blue-500">
                     </div>
 
@@ -66,17 +66,26 @@ const props = defineProps({
     dataEdit: Object
 });
 const dataEdit = props.dataEdit
-// console.log(dataEdit);
+
+let players = [];
+dataEdit.players.forEach(player => {
+    let playerObj = {
+        in_game_name: player.in_game_name,
+        email: player.user.email
+    };
+    players.push(playerObj);
+});
+
 
 let formData = ref({
+    team_id: dataEdit?.id,
     tournament_id : dataEdit?.tournament_id,
     team_name: dataEdit?.team_name,
     seed: dataEdit?.seed,
-    players: dataEdit?.players
+    players: players
 });
 
 const handleSave = async (close) => {
-    console.log(formData.value); 
 
     let validate = true;
     let errorMessage = "Please fill in all field"
@@ -84,7 +93,7 @@ const handleSave = async (close) => {
         validate = false;
     } else {
         for (const player of formData.value.players) {
-            if (!player.email.trim() || !player.gameName.trim()) {
+            if (!player.email.trim() || !player.in_game_name.trim()) {
                 errorMessage = "Please fill in all field"
                 validate = false;
                 break;
@@ -100,20 +109,19 @@ const handleSave = async (close) => {
     if (!validate) {
         notify(errorMessage)
     } else {
-        console.log(formData.value); 
         try {
-            // await useApiFetch("/sanctum/csrf-cookie");
-            // const { data, error, status } = await useApiFetch("/api/team/create", {
-            //     method: "POST",
-            //     body: formData.value
-            // });
-            // if (status.value === 'success') {
-            //     notify(data.value?.message)
-            //     await useApiFetch(`/api/team/getTeamsWithPlayers/${formData.value.tournament_id}`);
-            //     close();
-            // } else {
-            //     notify(error.value?.data.message)
-            // }
+            await useApiFetch("/sanctum/csrf-cookie");
+            const { data, error, status } = await useApiFetch("/api/team/update", {
+                method: "POST",
+                body: formData.value
+            });
+            if (status.value === 'success') {
+                notify(data.value?.message)
+                await useApiFetch(`/api/team/getTeamsWithPlayers/${formData.value.tournament_id}`);
+                close();
+            } else {
+                notify(error.value?.data.message)
+            }
         } catch (error) {
             console.log(error);
         }
