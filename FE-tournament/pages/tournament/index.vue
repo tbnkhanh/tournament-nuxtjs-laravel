@@ -2,7 +2,7 @@
 import { useAuthStore } from "~/stores/useAuthStore";
 
 const auth = useAuthStore();
-const { data } = await useApiFetch("/api/tournament/getAll");
+const { data, refresh } = await useApiFetch("/api/tournament/getAll");
 
 const modalCreate = ref(false);
 const modalDelete = ref(false);
@@ -59,7 +59,7 @@ const handleEdit = (tournament) => {
     <TournamentModalCreate :open="modalCreate" @close="closeModal" />
     <TournamentModalDelete :open="modalDelete" @close="closeModal" :tournamentName="dataDelete.name"
         :tournamentId="dataDelete.id" />
-    <TournamentModalEdit v-if="edit" :open="modalEdit" @close="closeModalEdit" :tournament="dataEdit" />
+    <TournamentModalEdit v-if="edit" :open="modalEdit" @close="closeModalEdit" :tournament="dataEdit" :refresh="refresh"/>
 
     <div style="text-align: center; margin-top: 10px; font-size: 25px;">
         All Tournaments

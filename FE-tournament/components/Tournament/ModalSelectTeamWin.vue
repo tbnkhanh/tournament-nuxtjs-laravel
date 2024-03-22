@@ -4,7 +4,7 @@
             <div class="bg-white w-1/2 p-6 rounded shadow-md" style="width: 500px; text-align: center;">
                 <div class="flex justify-end">
                     <!-- Close Button -->
-                    <button @click="close" class="text-gray-700 hover:text-red-500">
+                    <button @click=" emits('close');" class="text-gray-700 hover:text-red-500">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                             xmlns="http://www.w3.org/2000/svg">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -31,12 +31,11 @@
                             class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">{{ match.team2.team_name
                             }}</label>
                     </div>
-                    <p>Selected Team: {{ selectedTeam }}</p>
                 </div>
                 <div>
-                    <button @click="handleSelectTeam(close)"
+                    <button @click="handleSelectTeam()"
                         class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mt-3 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900">Confirm</button>
-                    <button @click="close"
+                    <button @click=" emits('close');" 
                         class="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700">Cancel</button>
                 </div>
 
@@ -57,24 +56,27 @@ const props = defineProps({
     open: Boolean,
     dataModal: Object
 });
+const emits = defineEmits();
+
 const selectedTeam = ref(null)
 const match = props.dataModal
 
-async function handleSelectTeam(close) {
-    await useApiFetch("/sanctum/csrf-cookie");
-    const { data, error, status } = await useApiFetch(`/api/matches/selectWinningTeam/${match.id}/${selectedTeam.value}`, {
-        method: "POST",
-    });
-}
-
-</script>
-
-<script>
-export default {
-    methods: {
-        close() {
-            this.$emit('close');
+async function handleSelectTeam() {
+    if (selectedTeam.value === null) {
+        notify("Please select a winning team")
+    } else {
+        await useApiFetch("/sanctum/csrf-cookie");
+        const { data, error, status } = await useApiFetch(`/api/matches/selectWinningTeam/${match.id}/${selectedTeam.value}`, {
+            method: "POST",
+        });
+        if (status.value === 'success') {
+            notify(data.value.message)
+            const {data : res} = await useApiFetch(`/api/matches/getAllMatches/${match.tournament_id}`);
+            emits('updateData', res);
+            emits('close');
+        } else {
+            notify(error.value.data.message)
         }
     }
-};
+}
 </script>

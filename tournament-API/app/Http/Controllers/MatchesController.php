@@ -206,5 +206,6 @@ class MatchesController extends Controller
                 $this->matchForNextRound($tournament->id, $next_round_number, $next_match_number, 'winner', $winningTeamId, $current_match_number);
             }
         }
+        return response()->json(["message" => "Successfully selecting the winning team"]);
     }
 }

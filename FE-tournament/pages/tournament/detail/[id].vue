@@ -1,5 +1,8 @@
 <script setup>
 import { useRoute } from "vue-router";
+import { useAuthStore } from "~/stores/useAuthStore";
+
+const auth = useAuthStore();
 const route = useRoute();
 const tournamentId = route.params.id;
 
@@ -27,6 +30,7 @@ const closeModal = () => {
   modalCreate.value = false;
   modalDelete.value = false;
   modalEdit.value = false;
+  createDispatch.value = false
 };
 
 let dataCreate = ref({});
@@ -94,7 +98,9 @@ const handleEdit = (team) => {
       <div style="text-align: center; font-size: 20px">
         <div>All Teams Participate</div>
 
-        <button @click="handleCreateTeam(tournament.id, tournament.team_size)"
+        <div v-if="teamsWithPlayers.length === 0">Please add new team for this tournament</div>
+
+        <button @click="handleCreateTeam(tournament.id, tournament.team_size)" v-if="auth.user?.user_type === 'admin'"
           class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-3" style="font-size: 16px;">
           Add New Team
         </button>
@@ -103,10 +109,10 @@ const handleEdit = (team) => {
           <div>{{ team.team_name }}</div>
 
           <div style="float: right; margin-bottom: 10px;">
-            <button type="button" @click="handleEdit(team)"
+            <button type="button" @click="handleEdit(team)" v-if="auth.user?.user_type === 'admin'"
               class="focus:outline-none text-white bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-yellow-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mt-3 dark:focus:ring-yellow-900">Edit</button>
 
-            <button type="button" @click="handleDelete(team.id, team.team_name, tournament.id)"
+            <button type="button" @click="handleDelete(team.id, team.team_name, tournament.id)" v-if="auth.user?.user_type === 'admin'"
               class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mt-3 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900">Delete</button>
           </div>
 

@@ -20,23 +20,23 @@ Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::prefix("tournament")->group(function () {
+Route::middleware(['auth:sanctum'])->prefix("tournament")->group(function () {
     Route::get('/getAll', [TournamentController::class, 'index']);
     Route::get('/findById/{id}', [TournamentController::class, 'findById']);
-    Route::post('/create', [TournamentController::class, 'store']);
-    Route::post('/update', [TournamentController::class, 'update']);
-    Route::delete('/delete/{id}', [TournamentController::class, 'destroy']);
+    Route::post('/create', [TournamentController::class, 'store'])->middleware('admin');
+    Route::post('/update', [TournamentController::class, 'update'])->middleware('admin');
+    Route::delete('/delete/{id}', [TournamentController::class, 'destroy'])->middleware('admin');
 });
 
-Route::prefix("team")->group(function () {
+Route::middleware(['auth:sanctum'])->prefix("team")->group(function () {
     Route::get('/getTeamsWithPlayers/{tournamentId}', [TeamController::class, 'getTeamsWithPlayers']);
-    Route::post('/create', [TeamController::class, 'store']);
-    Route::delete('/delete/{id}', [TeamController::class, 'destroy']);
-    Route::post('/update', [TeamController::class, 'update']);
+    Route::post('/create', [TeamController::class, 'store'])->middleware('admin');
+    Route::delete('/delete/{id}', [TeamController::class, 'destroy'])->middleware('admin');
+    Route::post('/update', [TeamController::class, 'update'])->middleware('admin');
 });
 
-Route::prefix("matches")->group(function () {
+Route::middleware(['auth:sanctum'])->prefix("matches")->group(function () {
     Route::get('/getAllMatches/{tournamentId}', [MatchesController::class, 'getAllMatches']);
-    Route::post('/generateBracket/{tournamentId}', [MatchesController::class, 'generateBracket']);
-    Route::post('/selectWinningTeam/{matchId}/{winTeamId}', [MatchesController::class, 'selectWinningTeam']);
+    Route::post('/generateBracket/{tournamentId}', [MatchesController::class, 'generateBracket'])->middleware('admin');
+    Route::post('/selectWinningTeam/{matchId}/{winTeamId}', [MatchesController::class, 'selectWinningTeam'])->middleware('admin');
 });

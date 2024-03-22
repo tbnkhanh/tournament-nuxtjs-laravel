@@ -117,9 +117,8 @@ const handleCreate = async (close) => {
             if (status.value === 'success') {
                 notify(data.value?.message)
                 await useApiFetch(`/api/team/getTeamsWithPlayers/${formData.value.tournament_id}`);
-
                 close();
-                // formData = ({})
+                // formData.value = ({})
             } else {
                 notify(error.value?.data.message)
             }

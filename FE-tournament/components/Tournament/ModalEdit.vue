@@ -92,7 +92,7 @@ const form = ref({
     startDate: tournament?.start_date,
     endDate: tournament?.end_date,
 });
-
+const emits = defineEmits();
 const notify = (message) => {
     useNuxtApp().$toast.info(message, {
         autoClose: 1000,
